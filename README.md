@@ -6,7 +6,7 @@ flowchart TD
     A[👥 WhatsApp Users<br/><b>Girlfriend • Father • Brother</b>] --> B[📱 WhatsApp Business API]
     
     %% Entry Point
-    B --> C{🌐 <b>HTTP Server</b><br/>Express.js + Webhooks}
+    B --> C{🌐 <b>FastAPI Server</b><br/>Python + Async Webhooks}
     
     %% Core MCP Engine
     C --> D[🧠 <b>MCP Protocol Engine</b><br/>Custom Implementation]
@@ -29,9 +29,9 @@ flowchart TD
     N --> B
     
     %% Data Storage
-    E <--> O[(🗄️ <b>PostgreSQL</b><br/>User Profiles<br/>Chat History<br/>Analytics)]
+    E <--> O[(🗄️ <b>DataStax Cassandra</b><br/>User Profiles<br/>Chat History<br/>High-Scale Analytics)]
     F <--> P[(⚡ <b>Redis Cache</b><br/>Quick Profile Lookup<br/>Session Management)]
-    F <--> Q[(🔍 <b>Vector DB</b><br/>Style Embeddings<br/>Similarity Search)]
+    F <--> Q[(🔍 <b>DataStax Vector</b><br/>Style Embeddings<br/>Similarity Search)]
     
     %% Training Pipeline
     R[📚 <b>Chat Scraper</b><br/>WhatsApp Exports] --> S[🔬 <b>Style Analyzer</b><br/>Extract Patterns]
@@ -45,9 +45,9 @@ flowchart TD
     
     %% Cost Breakdown
     subgraph COSTS[💰 <b>Monthly Costs</b>]
-        V["🔵 <b>Your MCP:</b> $15-75
+        V["🔵 <b>Your MCP:</b> $15-85
         • Hosting: $5-15
-        • Database: $0-10  
+        • DataStax Free: $0-25  
         • AI API: $10-50
         
         🔴 <b>Alternatives:</b> $300-1500
@@ -59,8 +59,8 @@ flowchart TD
     
     %% Tech Stack
     subgraph TECH[🛠️ <b>Tech Stack</b>]
-        W["<b>Backend:</b> Node.js/TypeScript
-        <b>Database:</b> PostgreSQL + Redis
+        W["<b>Backend:</b> Python/FastAPI
+        <b>Database:</b> DataStax Cassandra + Redis
         <b>AI:</b> OpenAI + Local Models
         <b>Hosting:</b> Railway/Render
         <b>Monitoring:</b> Grafana/Prometheus"]
@@ -90,5 +90,4 @@ flowchart TD
     class R,S,T trainingNode
     class U monitorNode
     class COSTS,TECH,PHASES infoBox
-
 ```
