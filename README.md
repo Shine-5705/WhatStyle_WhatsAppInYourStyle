@@ -1,5 +1,12 @@
 # WhatStyle
 
+```bash
+python -m grpc_tools.protoc \
+    --proto_path=app/grpc_services/protos \
+    --python_out=app/grpc_services/generated \
+    --grpc_python_out=app/grpc_services/generated \
+    app/grpc_services/protos/health.proto
+```
 ```mermaid
 flowchart TD
     %% Users
