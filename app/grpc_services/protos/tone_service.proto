@@ -1,0 +1,178 @@
+syntax = "proto3";
+
+package tone;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/Shine-5705/WhatStyle_WhatsAppInYourStyle/pkg/grpc/tone";
+
+// ===== TONE ANALYSIS SERVICE =====
+service ToneAnalysisService {
+    rpc AnalyzeTone(ToneAnalysisRequest) returns (ToneAnalysisResponse);
+    rpc BatchAnalyzeTone(BatchToneAnalysisRequest) returns (BatchToneAnalysisResponse);
+    rpc GetToneProfile(ToneProfileRequest) returns (ToneProfileResponse);
+    rpc UpdateToneProfile(UpdateToneProfileRequest) returns (ToneProfileResponse);
+    rpc StreamToneAnalysis(stream ToneAnalysisRequest) returns (stream ToneAnalysisResponse);
+    rpc TrainUserModel(TrainModelRequest) returns (TrainModelResponse);
+}
+
+// ===== TONE ANALYSIS =====
+message ToneAnalysisRequest {
+    string message_id = 1;
+    string text = 2;
+    string user_id = 3;
+    string context = 4;
+    repeated string previous_messages = 5;
+}
+
+message ToneAnalysisResponse {
+    string message_id = 1;
+    ToneClassification primary_tone = 2;
+    repeated ToneClassification alternative_tones = 3;
+    float confidence_score = 4;
+    EmotionalProfile emotional_profile = 5;
+    map<string, float> tone_features = 6;
+    google.protobuf.Timestamp analyzed_at = 7;
+}
+
+message ToneClassification {
+    ToneCategory category = 1;
+    float confidence = 2;
+    string description = 3;
+    repeated string key_indicators = 4;
+}
+
+message EmotionalProfile {
+    float sentiment_score = 1;      // -1.0 to 1.0
+    float energy_level = 2;         // 0.0 to 1.0
+    float formality_level = 3;      // 0.0 to 1.0
+    float urgency_level = 4;        // 0.0 to 1.0
+    repeated EmotionalDimension dimensions = 5;
+}
+
+message EmotionalDimension {
+    string name = 1;
+    float value = 2;
+    float confidence = 3;
+}
+
+// ===== BATCH PROCESSING =====
+message BatchToneAnalysisRequest {
+    repeated ToneAnalysisRequest requests = 1;
+    bool parallel_processing = 2;
+}
+
+message BatchToneAnalysisResponse {
+    repeated ToneAnalysisResponse responses = 1;
+    int32 processed_count = 2;
+    int32 failed_count = 3;
+    int64 total_processing_time_ms = 4;
+}
+
+// ===== TONE PROFILES =====
+message ToneProfileRequest {
+    string user_id = 1;
+    bool include_history = 2;
+}
+
+message ToneProfileResponse {
+    string user_id = 1;
+    UserToneProfile profile = 2;
+    repeated ToneHistoryEntry history = 3;
+}
+
+message UpdateToneProfileRequest {
+    string user_id = 1;
+    UserToneProfile profile = 2;
+    bool merge_with_existing = 3;
+}
+
+message UserToneProfile {
+    string user_id = 1;
+    map<string, float> tone_preferences = 2;
+    map<string, float> tone_patterns = 3;
+    CommunicationCharacteristics characteristics = 4;
+    google.protobuf.Timestamp last_analyzed = 5;
+    int32 message_count = 6;
+}
+
+message CommunicationCharacteristics {
+    float avg_message_length = 1;
+    float emoji_frequency = 2;
+    float capitalization_frequency = 3;
+    float punctuation_intensity = 4;
+    repeated string common_phrases = 5;
+    map<string, int32> word_frequency = 6;
+    TimePreferences time_preferences = 7;
+}
+
+message TimePreferences {
+    repeated int32 active_hours = 1;
+    float avg_response_time_minutes = 2;
+    bool prefers_quick_responses = 3;
+}
+
+message ToneHistoryEntry {
+    google.protobuf.Timestamp timestamp = 1;
+    ToneCategory detected_tone = 2;
+    float confidence = 3;
+    string message_sample = 4;
+}
+
+// ===== MODEL TRAINING =====
+message TrainModelRequest {
+    string user_id = 1;
+    repeated TrainingExample examples = 2;
+    TrainingConfig config = 3;
+}
+
+message TrainingExample {
+    string text = 1;
+    ToneCategory expected_tone = 2;
+    float weight = 3;
+    map<string, string> metadata = 4;
+}
+
+message TrainingConfig {
+    int32 epochs = 1;
+    float learning_rate = 2;
+    int32 batch_size = 3;
+    bool use_pretrained = 4;
+    repeated string features_to_use = 5;
+}
+
+message TrainModelResponse {
+    bool success = 1;
+    string model_id = 2;
+    TrainingResults results = 3;
+    string error_message = 4;
+}
+
+message TrainingResults {
+    float accuracy = 1;
+    float precision = 2;
+    float recall = 3;
+    float f1_score = 4;
+    int32 training_samples = 5;
+    int64 training_time_ms = 6;
+    map<string, float> class_metrics = 7;
+}
+
+// ===== ENUMS =====
+enum ToneCategory {
+    TONE_CATEGORY_UNSPECIFIED = 0;
+    TONE_CATEGORY_CASUAL = 1;
+    TONE_CATEGORY_FORMAL = 2;
+    TONE_CATEGORY_PLAYFUL = 3;
+    TONE_CATEGORY_CARING = 4;
+    TONE_CATEGORY_BUSINESS = 5;
+    TONE_CATEGORY_ROMANTIC = 6;
+    TONE_CATEGORY_FRIENDLY = 7;
+    TONE_CATEGORY_PROFESSIONAL = 8;
+    TONE_CATEGORY_EXCITED = 9;
+    TONE_CATEGORY_CONCERNED = 10;
+    TONE_CATEGORY_ANGRY = 11;
+    TONE_CATEGORY_HAPPY = 12;
+    TONE_CATEGORY_SAD = 13;
+    TONE_CATEGORY_NEUTRAL = 14;
+}

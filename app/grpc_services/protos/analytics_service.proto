@@ -1,0 +1,292 @@
+syntax = "proto3";
+
+package analytics;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
+import "google/protobuf/any.proto";
+
+option go_package = "github.com/Shine-5705/WhatStyle_WhatsAppInYourStyle/pkg/grpc/analytics";
+
+// ===== ANALYTICS SERVICE =====
+service AnalyticsService {
+    rpc GetConversationAnalytics(ConversationAnalyticsRequest) returns (ConversationAnalyticsResponse);
+    rpc GetUserAnalytics(UserAnalyticsRequest) returns (UserAnalyticsResponse);
+    rpc GetSystemMetrics(SystemMetricsRequest) returns (SystemMetricsResponse);
+    rpc StreamAnalytics(AnalyticsStreamRequest) returns (stream AnalyticsUpdate);
+    rpc GenerateReport(ReportRequest) returns (ReportResponse);
+}
+
+// ===== CONVERSATION ANALYTICS =====
+message ConversationAnalyticsRequest {
+    repeated string conversation_ids = 1;
+    google.protobuf.Timestamp start_time = 2;
+    google.protobuf.Timestamp end_time = 3;
+    repeated AnalyticsMetric metrics = 4;
+}
+
+message ConversationAnalyticsResponse {
+    repeated ConversationMetrics metrics = 1;
+    AnalyticsSummary summary = 2;
+    google.protobuf.Timestamp generated_at = 3;
+}
+
+message ConversationMetrics {
+    string conversation_id = 1;
+    int32 total_messages = 2;
+    google.protobuf.Duration avg_response_time = 3;
+    map<string, int32> tone_distribution = 4;
+    float sentiment_trend = 5;
+    int32 user_satisfaction_score = 6;
+    ConversationFlow flow_analysis = 7;
+}
+
+message ConversationFlow {
+    repeated FlowStage stages = 1;
+    repeated FlowTransition transitions = 2;
+    float engagement_score = 3;
+}
+
+message FlowStage {
+    string stage_name = 1;
+    google.protobuf.Duration duration = 2;
+    int32 message_count = 3;
+    string dominant_tone = 4;
+}
+
+message FlowTransition {
+    string from_stage = 1;
+    string to_stage = 2;
+    string trigger = 3;
+    float probability = 4;
+}
+
+// ===== USER ANALYTICS =====
+message UserAnalyticsRequest {
+    repeated string user_ids = 1;
+    google.protobuf.Timestamp start_time = 2;
+    google.protobuf.Timestamp end_time = 3;
+    bool include_behavioral_patterns = 4;
+}
+
+message UserAnalyticsResponse {
+    repeated UserMetrics user_metrics = 1;
+    UserBehaviorAnalysis behavior_analysis = 2;
+}
+
+message UserMetrics {
+    string user_id = 1;
+    int32 total_conversations = 2;
+    int32 total_messages = 3;
+    google.protobuf.Duration avg_session_length = 4;
+    map<string, float> tone_preferences = 5;
+    CommunicationPatterns patterns = 6;
+    EngagementMetrics engagement = 7;
+}
+
+message CommunicationPatterns {
+    repeated int32 active_hours = 1;
+    repeated string preferred_topics = 2;
+    float avg_message_length = 3;
+    float emoji_usage_rate = 4;
+    map<string, int32> vocabulary_analysis = 5;
+}
+
+message EngagementMetrics {
+    float response_rate = 1;
+    google.protobuf.Duration avg_response_time = 2;
+    int32 conversation_initiation_count = 3;
+    float satisfaction_score = 4;
+}
+
+message UserBehaviorAnalysis {
+    repeated BehaviorPattern patterns = 1;
+    repeated BehaviorAnomaly anomalies = 2;
+    PersonalityInsights personality = 3;
+}
+
+message BehaviorPattern {
+    string pattern_name = 1;
+    string description = 2;
+    float confidence = 3;
+    repeated string supporting_evidence = 4;
+}
+
+message BehaviorAnomaly {
+    string anomaly_type = 1;
+    google.protobuf.Timestamp detected_at = 2;
+    float severity = 3;
+    string description = 4;
+}
+
+message PersonalityInsights {
+    map<string, float> traits = 1;
+    repeated string communication_preferences = 2;
+    float extroversion_score = 3;
+    float emotional_stability = 4;
+}
+
+// ===== SYSTEM METRICS =====
+message SystemMetricsRequest {
+    google.protobuf.Timestamp start_time = 1;
+    google.protobuf.Timestamp end_time = 2;
+    repeated string metric_types = 3;
+}
+
+message SystemMetricsResponse {
+    PerformanceMetrics performance = 1;
+    ResourceUtilization resources = 2;
+    ErrorAnalysis errors = 3;
+    ThroughputMetrics throughput = 4;
+}
+
+message PerformanceMetrics {
+    google.protobuf.Duration avg_response_time = 1;
+    google.protobuf.Duration p95_response_time = 2;
+    google.protobuf.Duration p99_response_time = 3;
+    float success_rate = 4;
+    int32 total_requests = 5;
+}
+
+message ResourceUtilization {
+    float cpu_usage_percent = 1;
+    float memory_usage_percent = 2;
+    float disk_usage_percent = 3;
+    int32 active_connections = 4;
+    map<string, float> custom_metrics = 5;
+}
+
+message ErrorAnalysis {
+    int32 total_errors = 1;
+    map<string, int32> error_types = 2;
+    repeated ErrorTrend trends = 3;
+}
+
+message ErrorTrend {
+    string error_type = 1;
+    repeated TimeSeriesPoint points = 2;
+}
+
+message TimeSeriesPoint {
+    google.protobuf.Timestamp timestamp = 1;
+    float value = 2;
+}
+
+message ThroughputMetrics {
+    float messages_per_second = 1;
+    float conversations_per_minute = 2;
+    float ai_requests_per_minute = 3;
+    map<string, float> service_throughput = 4;
+}
+
+// ===== STREAMING ANALYTICS =====
+message AnalyticsStreamRequest {
+    repeated AnalyticsSubscription subscriptions = 1;
+    google.protobuf.Duration update_interval = 2;
+}
+
+message AnalyticsSubscription {
+    AnalyticsType type = 1;
+    repeated string filters = 2;
+    string subscription_id = 3;
+}
+
+message AnalyticsUpdate {
+    string subscription_id = 1;
+    AnalyticsType type = 2;
+    google.protobuf.Any data = 3;
+    google.protobuf.Timestamp timestamp = 4;
+}
+
+// ===== REPORT GENERATION =====
+message ReportRequest {
+    ReportType report_type = 1;
+    google.protobuf.Timestamp start_time = 2;
+    google.protobuf.Timestamp end_time = 3;
+    repeated string entity_ids = 4; // user_ids, conversation_ids, etc.
+    ReportConfig config = 5;
+}
+
+message ReportConfig {
+    ReportFormat format = 1;
+    repeated string metrics = 2;
+    bool include_visualizations = 3;
+    map<string, string> parameters = 4;
+}
+
+message ReportResponse {
+    string report_id = 1;
+    bytes report_data = 2;
+    ReportMetadata metadata = 3;
+    repeated string download_urls = 4;
+}
+
+message ReportMetadata {
+    ReportType type = 1;
+    ReportFormat format = 2;
+    int64 size_bytes = 3;
+    google.protobuf.Timestamp generated_at = 4;
+    google.protobuf.Timestamp expires_at = 5;
+    string checksum = 6;
+}
+
+message AnalyticsSummary {
+    int32 total_conversations = 1;
+    int32 total_messages = 2;
+    int32 active_users = 3;
+    float avg_satisfaction = 4;
+    map<string, int32> top_topics = 5;
+    TrendAnalysis trends = 6;
+}
+
+message TrendAnalysis {
+    float conversation_growth_rate = 1;
+    float user_engagement_trend = 2;
+    float tone_satisfaction_trend = 3;
+    repeated TrendPoint data_points = 4;
+}
+
+message TrendPoint {
+    google.protobuf.Timestamp timestamp = 1;
+    map<string, float> values = 2;
+}
+
+// ===== ENUMS =====
+enum AnalyticsMetric {
+    ANALYTICS_METRIC_UNSPECIFIED = 0;
+    ANALYTICS_METRIC_MESSAGE_COUNT = 1;
+    ANALYTICS_METRIC_RESPONSE_TIME = 2;
+    ANALYTICS_METRIC_TONE_DISTRIBUTION = 3;
+    ANALYTICS_METRIC_SENTIMENT_ANALYSIS = 4;
+    ANALYTICS_METRIC_USER_SATISFACTION = 5;
+    ANALYTICS_METRIC_ENGAGEMENT_RATE = 6;
+    ANALYTICS_METRIC_CONVERSATION_FLOW = 7;
+}
+
+enum AnalyticsType {
+    ANALYTICS_TYPE_UNSPECIFIED = 0;
+    ANALYTICS_TYPE_CONVERSATION = 1;
+    ANALYTICS_TYPE_USER_BEHAVIOR = 2;
+    ANALYTICS_TYPE_SYSTEM_PERFORMANCE = 3;
+    ANALYTICS_TYPE_TONE_ANALYSIS = 4;
+    ANALYTICS_TYPE_REAL_TIME = 5;
+}
+
+enum ReportType {
+    REPORT_TYPE_UNSPECIFIED = 0;
+    REPORT_TYPE_CONVERSATION_SUMMARY = 1;
+    REPORT_TYPE_USER_BEHAVIOR = 2;
+    REPORT_TYPE_TONE_ANALYSIS = 3;
+    REPORT_TYPE_SYSTEM_PERFORMANCE = 4;
+    REPORT_TYPE_EXECUTIVE_SUMMARY = 5;
+    REPORT_TYPE_CUSTOM = 6;
+}
+
+enum ReportFormat {
+    REPORT_FORMAT_UNSPECIFIED = 0;
+    REPORT_FORMAT_PDF = 1;
+    REPORT_FORMAT_JSON = 2;
+    REPORT_FORMAT_CSV = 3;
+    REPORT_FORMAT_EXCEL = 4;
+    REPORT_FORMAT_HTML = 5;
+}

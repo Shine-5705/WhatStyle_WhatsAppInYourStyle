@@ -1,0 +1,222 @@
+syntax = "proto3";
+
+package mcp;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/any.proto";
+import "google/protobuf/struct.proto";
+
+option go_package = "github.com/Shine-5705/WhatStyle_WhatsAppInYourStyle/pkg/grpc/mcp";
+
+// ==== MCP Core Service ====
+service MCPService {
+  rpc ProcessMessage(MessageRequest) returns (MessageResponse);
+  rpc StreamConversation(ConversationStreamRequest) returns (stream ConversationUpdate);
+  rpc GetContext(ContextRequest) returns (ContextResponse);
+  rpc UpdateContext(UpdateContextRequest) returns (ContextResponse);
+  rpc GetTools(ToolsRequest) returns (ToolsResponse);
+  rpc ExecuteTool(ToolExecutionRequest) returns (ToolExecutionResponse);
+  rpc HealthCheck(HealthRequest) returns (HealthResponse);
+}
+
+// ==== Message Processing ====
+message MessageRequest {
+  string message_id = 1;
+  string sender_phone = 2;
+  string message_text = 3;
+  MessageType message_type = 4;
+  google.protobuf.Timestamp timestamp = 5;
+  map<string, string> metadata = 6;
+  string conversation_id = 7;
+}
+
+message MessageResponse {
+  string response_id = 1;
+  string response_text = 2;
+  ToneType applied_tone = 3;
+  float confidence_score = 4;
+  google.protobuf.Timestamp generated_at = 5;
+  repeated string suggested_responses = 6;
+  ProcessingMetadata processing_info = 7;
+}
+
+message ProcessingMetadata {
+  int64 processing_time_ms = 1;
+  string model_used = 2;
+  string tone_profile_id = 3;
+  map<string, float> tone_scores = 4;
+}
+
+// ==== CONVERSATION STREAMING ====
+message ConversationStreamRequest {
+  string user_id = 1;
+  repeated string conversation_ids = 2;
+  bool include_tone_analysis = 3;
+}
+
+message ConversationUpdate {
+  string conversation_id = 1;
+  string user_id = 2;
+  int32 message_limit = 3;
+}
+
+// ===== CONTEXT MANAGEMENT =====
+message ContextRequest {
+    string conversation_id = 1;
+    string user_id = 2;
+    int32 message_limit = 3;
+}
+
+message ContextResponse {
+    string conversation_id = 1;
+    repeated ContextMessage messages = 2;
+    UserProfile user_profile = 3;
+    ConversationState state = 4;
+}
+
+message UpdateContextRequest {
+    string conversation_id = 1;
+    ContextMessage new_message = 2;
+    bool update_tone_profile = 3;
+}
+
+message ContextMessage {
+    string message_id = 1;
+    string sender_id = 2;
+    string content = 3;
+    MessageType type = 4;
+    ToneType detected_tone = 5;
+    google.protobuf.Timestamp timestamp = 6;
+    map<string, google.protobuf.Value> metadata = 7;
+}
+
+// ===== USER PROFILES =====
+message UserProfile {
+    string user_id = 1;
+    string phone_number = 2;
+    string name = 3;
+    string relationship = 4;
+    TonePreferences tone_preferences = 5;
+    CommunicationStyle communication_style = 6;
+    google.protobuf.Timestamp last_updated = 7;
+}
+
+message TonePreferences {
+    ToneType primary_tone = 1;
+    repeated ToneType acceptable_tones = 2;
+    map<string, float> tone_weights = 3;
+    float formality_level = 4;
+    float emoji_frequency = 5;
+}
+
+message CommunicationStyle {
+    float avg_message_length = 1;
+    repeated string common_phrases = 2;
+    repeated string vocabulary = 3;
+    float response_time_preference = 4;
+    map<string, int32> emoji_usage = 5;
+    bool uses_abbreviations = 6;
+    LanguagePattern language_pattern = 7;
+}
+
+message LanguagePattern {
+    string primary_language = 1;
+    float formality_score = 2;
+    float enthusiasm_level = 3;
+    repeated string characteristic_words = 4;
+    map<string, float> topic_preferences = 5;
+}
+
+// ===== TOOLS SYSTEM =====
+message ToolsRequest {
+    string context = 1;
+    repeated string requested_tools = 2;
+}
+
+message ToolsResponse {
+    repeated MCPTool available_tools = 1;
+}
+
+message MCPTool {
+    string name = 1;
+    string description = 2;
+    google.protobuf.Struct parameters_schema = 3;
+    repeated string required_permissions = 4;
+    bool is_available = 5;
+}
+
+message ToolExecutionRequest {
+    string tool_name = 1;
+    google.protobuf.Struct parameters = 2;
+    string context_id = 3;
+    string user_id = 4;
+}
+
+message ToolExecutionResponse {
+    bool success = 1;
+    google.protobuf.Any result = 2;
+    string error_message = 3;
+    int64 execution_time_ms = 4;
+}
+
+// ===== HEALTH CHECK =====
+message HealthRequest {
+    string service_name = 1;
+}
+
+message HealthResponse {
+    HealthStatus status = 1;
+    string message = 2;
+    map<string, string> details = 3;
+    google.protobuf.Timestamp timestamp = 4;
+}
+
+// ==== ENUMS ====
+enum MessageType {
+  MESSAGE_TYPE_UNSPECIFIED = 0;
+  MESSAGE_TYPE_TEXT = 1;
+  MESSAGE_TYPE_IMAGE = 2;
+  MESSAGE_TYPE_AUDIO = 3;
+  MESSAGE_VIDEO = 4;
+  MESSAGE_TYPE_DOCUMENT = 5;
+  MESSAGE_TYPE_STICKER = 6;
+  MESSAGE_TYPE_LOCATION = 7;
+  MESSAGE_TYPE_CONTACT = 8;
+}
+
+enum ToneType {
+    TONE_TYPE_UNSPECIFIED = 0;
+    TONE_TYPE_CASUAL = 1;
+    TONE_TYPE_FORMAL = 2;
+    TONE_TYPE_PLAYFUL = 3;
+    TONE_TYPE_CARING = 4;
+    TONE_TYPE_BUSINESS = 5;
+    TONE_TYPE_ROMANTIC = 6;
+    TONE_TYPE_FRIENDLY = 7;
+    TONE_TYPE_PROFESSIONAL = 8;
+}
+
+enum ConversationEvent {
+    CONVERSATION_EVENT_UNSPECIFIED = 0;
+    CONVERSATION_EVENT_MESSAGE_RECEIVED = 1;
+    CONVERSATION_EVENT_MESSAGE_SENT = 2;
+    CONVERSATION_EVENT_TONE_UPDATED = 3;
+    CONVERSATION_EVENT_CONTEXT_CHANGED = 4;
+    CONVERSATION_EVENT_USER_TYPING = 5;
+}
+
+enum ConversationState {
+    CONVERSATION_STATE_UNSPECIFIED = 0;
+    CONVERSATION_STATE_ACTIVE = 1;
+    CONVERSATION_STATE_WAITING = 2;
+    CONVERSATION_STATE_PAUSED = 3;
+    CONVERSATION_STATE_ENDED = 4;
+}
+
+enum HealthStatus {
+    HEALTH_STATUS_UNSPECIFIED = 0;
+    HEALTH_STATUS_HEALTHY = 1;
+    HEALTH_STATUS_DEGRADED = 2;
+    HEALTH_STATUS_UNHEALTHY = 3;
+    HEALTH_STATUS_UNKNOWN = 4;
+}
