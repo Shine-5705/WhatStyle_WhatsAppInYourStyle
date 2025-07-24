@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package mcp;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/any.proto";
+import "google/protobuf/struct.proto";
+
+option go_package = "github.com/Shine-5705/WhatStyle_WhatsAppInYourStyle";
+
+// ==== MCP Core Service ====
+service MCPService {
+  rpc ProcessMessage(MessageRequest) returns (MessageResponse);
+  rpc StreamConverstation(ConversationStreamRequest) returns (stream ConverstationUpdate);
+  rpc GetContext(ContextRequest) returns (ContextResponse);
+  rpc UpdateContext(UpdateContextRequest) returns (ContextResponse);
+  rpc GetTools(ToolsRequest) returns (ToolsResponse);
+  rpc ExecuteTool(ToolExecutionRequest) returns (ToolExecutionResponse);
+  rpc HealthCheck(HealthRequest) returns (HealthResponse);
+}
+
+// ==== Message Processing
+message MessageRequest {
+  string message_id = 1;
+  string sneder_phone = 2;
+  string message_text = 3;
+  MessageType message_type = 4;
+  google.protobuf.Timestamp timestamp = 5;
+  map<string, string> metadata = 6;
+  string converstation_id = 7;
+}
+
+// ==== ENUMS ====
+enum MessageType {
+  MESSAGE_TYPE_UNSPECIFIED = 0;
+  MESSAGE_TYPE_TEXT = 1;
+  MESSAGE_TYPE_IMAGE = 2;
+  MESSAGE_TYPE_AUDIO = 3;
+  MESSAGE_VIDEO = 4;
+  MESSAGE_TYPE_DOCUMENT = 5;
+  MESSAGE_TYPE_STICKER = 6;
+  MESSAGE_TYPE_LOCATION = 7;
+  MESSAGE_TYPE_CONTACT = 8;
+}
