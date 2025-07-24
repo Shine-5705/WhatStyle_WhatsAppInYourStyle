@@ -53,6 +53,38 @@ sequenceDiagram
     Gateway->>WA: Send message to girlfriend
     WA->>GF: "Hey love! Just working on my project 😊 Missing you! What are you up to? 💕"
 ```
-```
 
+```mermaid
+sequenceDiagram
+    participant Dad as 👨 Father
+    participant WA as 📱 WhatsApp API
+    participant Gateway as 🌐 API Gateway
+    participant MCP as 🤖 MCP Service
+    participant ToneService as 🎯 Tone Service
+    participant ProfileService as 👤 Profile Service
+    participant AIService as 🧠 AI Service
+    participant MistralAPI as 🔮 Mistral AI
+
+    Note over Dad, MistralAPI: Formal conversation with father
+    
+    Dad->>WA: "Good morning. How are your studies going?"
+    WA->>Gateway: POST /webhook with message
+    Gateway->>MCP: ProcessMessage formal text
+    
+    MCP->>ProfileService: GetUserProfile father phone
+    ProfileService-->>MCP: UserProfile formal tone no emojis
+    
+    MCP->>ToneService: AnalyzeTone formal message
+    ToneService->>ToneService: Detect formal greeting and proper grammar
+    ToneService-->>MCP: ToneAnalysis formal caring high confidence
+    
+    MCP->>AIService: GenerateResponse formal tone father relationship
+    AIService->>AIService: Build respectful informative prompt
+    AIService->>MistralAPI: Chat completion with formal prompt
+    MistralAPI-->>AIService: Professional respectful response
+    AIService-->>MCP: Formatted formal response
+    
+    MCP-->>Gateway: MessageResponse formal text
+    Gateway->>WA: Send formal response
+    WA->>Dad: "Good morning Dad. My studies are going well, thank you for asking. I'm currently working on my final project and making good progress. How are you doing?"
 ```
