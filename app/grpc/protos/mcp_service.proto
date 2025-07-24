@@ -11,7 +11,7 @@ option go_package = "github.com/Shine-5705/WhatStyle_WhatsAppInYourStyle";
 // ==== MCP Core Service ====
 service MCPService {
   rpc ProcessMessage(MessageRequest) returns (MessageResponse);
-  rpc StreamConverstation(ConversationStreamRequest) returns (stream ConverstationUpdate);
+  rpc StreamConversation(ConversationStreamRequest) returns (stream ConversationUpdate);
   rpc GetContext(ContextRequest) returns (ContextResponse);
   rpc UpdateContext(UpdateContextRequest) returns (ContextResponse);
   rpc GetTools(ToolsRequest) returns (ToolsResponse);
@@ -19,15 +19,45 @@ service MCPService {
   rpc HealthCheck(HealthRequest) returns (HealthResponse);
 }
 
-// ==== Message Processing
+// ==== Message Processing ====
 message MessageRequest {
   string message_id = 1;
-  string sneder_phone = 2;
+  string sender_phone = 2;
   string message_text = 3;
   MessageType message_type = 4;
   google.protobuf.Timestamp timestamp = 5;
   map<string, string> metadata = 6;
-  string converstation_id = 7;
+  string conversation_id = 7;
+}
+
+message MessageResponse {
+  string response_id = 1;
+  string response_text = 2;
+  ToneType applied_tone = 3;
+  float confidence_score = 4;
+  google.protobuf.Timestamp generated_at = 5;
+  repeated string suggested_responses = 6;
+  ProcessingMetadata processing_info = 7;
+}
+
+message ProcessingMetadata {
+  int64 processing_time_ms = 1;
+  string model_used = 2;
+  string tone_profile_id = 3;
+  map<string, float> tone_scores = 4;
+}
+
+// ==== CONVERSATION STREAMING ====
+message ConversationStreamRequest {
+  string user_id = 1;
+  repeated string conversation_ids = 2;
+  bool include_tone_analysis = 3;
+}
+
+message ConversationUpdate {
+  string conversation_id = 1;
+  string user_id = 2;
+  int32 message_limit = 3;
 }
 
 // ==== ENUMS ====
