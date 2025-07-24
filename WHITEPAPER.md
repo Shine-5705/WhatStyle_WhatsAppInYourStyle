@@ -629,3 +629,411 @@ classDiagram
     SparkJobManager --> StreamProcessor : manages
     ModelTrainer --> ToneAnalyticsBatch : uses data from
 ```
+
+## System Architecture
+
+Mircoservice Architecture Overview with DataStax 
+```mermaid
+graph TB
+    subgraph "External Layer"
+        WhatsApp[📱 WhatsApp Business API]
+        WebInterface[🌐 Web Dashboard]
+        MobileApp[📱 Mobile App]
+    end
+    
+    subgraph "API Gateway Layer"
+        Gateway[🌐 API Gateway<br/>Rate Limiting, Auth, Routing]
+        LoadBalancer[⚖️ Load Balancer<br/>Traffic Distribution]
+    end
+    
+    subgraph "Core Services"
+        MCPService[🤖 MCP Service<br/>Protocol Handler]
+        ToneService[🎯 Tone Analysis Service<br/>ML-Powered Classification]
+        AIService[🧠 AI Service<br/>Response Generation]
+        UserService[👤 User Profile Service<br/>Profile Management]
+        ConversationService[💬 Conversation Service<br/>Context Management]
+    end
+    
+    subgraph "Specialized Services"
+        StickerService[🎭 Sticker Service<br/>Media Selection]
+        AnalyticsService[📊 Analytics Service<br/>Insights & Reports]
+        NotificationService[🔔 Notification Service<br/>Alerts & Updates]
+        FallbackService[🔄 Fallback Service<br/>Error Recovery]
+    end
+    
+    subgraph "Data Layer"
+        DataStaxAstra[(🗄️ DataStax Astra DB<br/>Cloud-Native Database)]
+        DataStaxVector[(🔍 DataStax Vector Search<br/>Embeddings & Similarity)]
+        RedisCluster[(⚡ Redis Cluster<br/>Cache & Sessions)]
+    end
+    
+    subgraph "Processing Layer"
+        SparkCluster[⚡ Spark Cluster<br/>Batch & Stream Processing]
+        KafkaCluster[📊 Kafka Cluster<br/>Event Streaming]
+        MLPipeline[🤖 ML Pipeline<br/>Model Training]
+    end
+    
+    subgraph "External AI"
+        MistralAPI[🔮 Mistral AI API]
+        OpenAIAPI[🤖 OpenAI API]
+        LocalLLM[🏠 Local LLM<br/>Ollama/Local Models]
+    end
+    
+    subgraph "Monitoring"
+        Prometheus[📈 Prometheus<br/>Metrics Collection]
+        Grafana[📊 Grafana<br/>Dashboards]
+        AlertManager[🚨 Alert Manager<br/>Incident Response]
+    end
+    
+    %% External connections
+    WhatsApp --> Gateway
+    WebInterface --> Gateway
+    MobileApp --> Gateway
+    
+    %% Gateway layer
+    Gateway --> LoadBalancer
+    LoadBalancer --> MCPService
+    LoadBalancer --> UserService
+    LoadBalancer --> AnalyticsService
+    
+    %% Core service interactions
+    MCPService --> ToneService
+    MCPService --> AIService
+    MCPService --> ConversationService
+    MCPService --> UserService
+    
+    ToneService --> AIService
+    AIService --> StickerService
+    ConversationService --> AnalyticsService
+    UserService --> NotificationService
+    
+    %% AI service connections
+    AIService --> MistralAPI
+    AIService --> OpenAIAPI
+    AIService --> LocalLLM
+    FallbackService --> LocalLLM
+    
+    %% Data layer connections
+    MCPService --> RedisCluster
+    ToneService --> DataStaxAstra
+    ToneService --> DataStaxVector
+    UserService --> DataStaxAstra
+    ConversationService --> DataStaxAstra
+    AnalyticsService --> DataStaxAstra
+    
+    %% Processing layer
+    ToneService --> KafkaCluster
+    AnalyticsService --> SparkCluster
+    KafkaCluster --> SparkCluster
+    SparkCluster --> MLPipeline
+    MLPipeline --> ToneService
+    
+    %% Monitoring connections
+    MCPService -.-> Prometheus
+    ToneService -.-> Prometheus
+    AIService -.-> Prometheus
+    Prometheus --> Grafana
+    Prometheus --> AlertManager
+```
+
+Service Communication Patterns 
+```mermaid
+graph LR
+    subgraph "Synchronous gRPC"
+        MCPSync[MCP Service] --> ToneSync[Tone Service]
+        MCPSync --> UserSync[User Service]
+        ToneSync --> AISync[AI Service]
+    end
+    
+    subgraph "Asynchronous Messaging"
+        ToneAsync[Tone Service] -->|Kafka| AnalyticsAsync[Analytics Service]
+        ConvAsync[Conversation Service] -->|Kafka| MLAsync[ML Pipeline]
+        UserAsync[User Service] -->|Kafka| NotifAsync[Notification Service]
+    end
+    
+    subgraph "Event Streaming"
+        KafkaTopics[📊 Kafka Topics<br/>• message-events<br/>• tone-updates<br/>• user-actions<br/>• system-metrics]
+        
+        SparkStream[⚡ Spark Streaming<br/>Real-time Processing]
+        
+        KafkaTopics --> SparkStream
+        SparkStream --> KafkaTopics
+    end
+    
+    subgraph "Caching Strategy"
+        L1Cache[🔥 L1 Cache<br/>Application Memory]
+        L2Cache[⚡ L2 Cache<br/>Redis Cluster]
+        Database[(🗄️ Database<br/>DataStax Astra)]
+        
+        L1Cache -->|Miss| L2Cache
+        L2Cache -->|Miss| Database
+    end
+
+```
+
+Data Flow Architecture
+```mermaid
+flowchart TD
+    subgraph "Ingestion Layer"
+        WAMessage[📱 WhatsApp Message] --> MessageQueue[📬 Message Queue]
+        WebInput[🌐 Web Input] --> MessageQueue
+        APIInput[🔌 API Input] --> MessageQueue
+    end
+    
+    subgraph "Processing Pipeline"
+        MessageQueue --> Validator[✅ Message Validator]
+        Validator --> ToneAnalyzer[🎯 Tone Analyzer]
+        ToneAnalyzer --> ContextBuilder[📋 Context Builder]
+        ContextBuilder --> ResponseGen[🧠 Response Generator]
+        ResponseGen --> OutputFormatter[📝 Output Formatter]
+    end
+    
+    subgraph "Real-time Stream"
+        ToneAnalyzer --> ToneStream[🌊 Tone Stream]
+        ContextBuilder --> ConversationStream[💬 Conversation Stream]
+        ResponseGen --> AnalyticsStream[📊 Analytics Stream]
+        
+        ToneStream --> SparkProcessor[⚡ Spark Processor]
+        ConversationStream --> SparkProcessor
+        AnalyticsStream --> SparkProcessor
+        
+        SparkProcessor --> MLUpdater[🤖 ML Model Updater]
+        SparkProcessor --> DashboardUpdater[📈 Dashboard Updater]
+    end
+    
+    subgraph "Storage Layer"
+        OutputFormatter --> MessageStore[(💬 Message Store<br/>DataStax Astra)]
+        ToneAnalyzer --> ToneStore[(🎯 Tone Store<br/>DataStax Astra)]
+        ContextBuilder --> ContextStore[(📋 Context Store<br/>DataStax Astra)]
+        MLUpdater --> ModelStore[(🤖 Model Store<br/>DataStax Vector)]
+    end
+    
+    subgraph "Output Layer"
+        OutputFormatter --> WhatsAppAPI[📱 WhatsApp API]
+        OutputFormatter --> WebSocket[🔌 WebSocket]
+        OutputFormatter --> PushNotification[🔔 Push Notification]
+    end
+```
+
+State Management and Event Flow
+```mermaid
+stateDiagram-v2
+    [*] --> MessageReceived
+    
+    MessageReceived --> ValidatingMessage
+    ValidatingMessage --> MessageValid: validation_success
+    ValidatingMessage --> MessageRejected: validation_failed
+    
+    MessageValid --> LoadingUserProfile
+    LoadingUserProfile --> ProfileLoaded: profile_found
+    LoadingUserProfile --> CreatingProfile: profile_not_found
+    
+    CreatingProfile --> ProfileLoaded: profile_created
+    
+    ProfileLoaded --> AnalyzingTone
+    AnalyzingTone --> ToneAnalyzed: analysis_complete
+    AnalyzingTone --> ToneFallback: analysis_failed
+    
+    ToneAnalyzed --> GeneratingResponse
+    ToneFallback --> GeneratingResponse
+    
+    GeneratingResponse --> ResponseGenerated: generation_success
+    GeneratingResponse --> UsingFallback: generation_failed
+    
+    UsingFallback --> ResponseGenerated: fallback_success
+    UsingFallback --> ErrorResponse: fallback_failed
+    
+    ResponseGenerated --> SendingResponse
+    SendingResponse --> MessageSent: send_success
+    SendingResponse --> RetryingSend: send_failed
+    
+    RetryingSend --> MessageSent: retry_success
+    RetryingSend --> SendFailed: max_retries_exceeded
+    
+    MessageSent --> UpdatingContext
+    UpdatingContext --> ContextUpdated
+    
+    ContextUpdated --> LearningFromInteraction
+    LearningFromInteraction --> [*]
+    
+    MessageRejected --> [*]
+    ErrorResponse --> [*]
+    SendFailed --> [*]
+```
+
+Event Driven Architecture
+```mermaid
+graph TB
+    subgraph "Event Sources"
+        UserAction[👤 User Actions]
+        SystemEvent[⚙️ System Events]
+        ExternalAPI[🔌 External API Events]
+        ScheduledJob[⏰ Scheduled Jobs]
+    end
+    
+    subgraph "Event Bus"
+        EventBus[📊 Kafka Event Bus<br/>Central Message Broker]
+    end
+    
+    subgraph "Event Topics"
+        MessageTopic[📬 message-events<br/>• message_received<br/>• message_sent<br/>• message_failed]
+        
+        ToneTopic[🎯 tone-events<br/>• tone_analyzed<br/>• profile_updated<br/>• model_trained]
+        
+        UserTopic[👤 user-events<br/>• user_created<br/>• profile_updated<br/>• preference_changed]
+        
+        SystemTopic[⚙️ system-events<br/>• service_started<br/>• error_occurred<br/>• health_check]
+    end
+    
+    subgraph "Event Consumers"
+        AnalyticsConsumer[📊 Analytics Consumer<br/>Real-time metrics]
+        
+        MLConsumer[🤖 ML Consumer<br/>Model training data]
+        
+        NotificationConsumer[🔔 Notification Consumer<br/>User alerts]
+        
+        AuditConsumer[📋 Audit Consumer<br/>Compliance logging]
+        
+        DashboardConsumer[📈 Dashboard Consumer<br/>Live updates]
+    end
+    
+    subgraph "Event Processing"
+        StreamProcessor[⚡ Stream Processor<br/>Real-time aggregation]
+        
+        BatchProcessor[📦 Batch Processor<br/>Scheduled analysis]
+        
+        CEPEngine[🔍 Complex Event Processing<br/>Pattern detection]
+    end
+    
+    %% Event flow
+    UserAction --> EventBus
+    SystemEvent --> EventBus
+    ExternalAPI --> EventBus
+    ScheduledJob --> EventBus
+    
+    EventBus --> MessageTopic
+    EventBus --> ToneTopic
+    EventBus --> UserTopic
+    EventBus --> SystemTopic
+    
+    MessageTopic --> AnalyticsConsumer
+    MessageTopic --> AuditConsumer
+    
+    ToneTopic --> MLConsumer
+    ToneTopic --> DashboardConsumer
+    
+    UserTopic --> NotificationConsumer
+    UserTopic --> AnalyticsConsumer
+    
+    SystemTopic --> DashboardConsumer
+    SystemTopic --> AuditConsumer
+    
+    AnalyticsConsumer --> StreamProcessor
+    MLConsumer --> BatchProcessor
+    DashboardConsumer --> CEPEngine
+```
+
+Deployment Architecture with DataStax
+```mermaid
+graph TB
+    subgraph "Load Balancers"
+        ELB[🌐 External Load Balancer<br/>AWS ALB / nginx]
+        ILB[⚖️ Internal Load Balancer<br/>Service mesh / Istio]
+    end
+    
+    subgraph "Kubernetes Cluster"
+        subgraph "API Services Namespace"
+            APIPod1[🤖 MCP Service Pod 1]
+            APIPod2[🤖 MCP Service Pod 2]
+            APIPod3[🤖 MCP Service Pod 3]
+        end
+        
+        subgraph "AI Services Namespace"
+            AIPod1[🧠 AI Service Pod 1]
+            AIPod2[🧠 AI Service Pod 2]
+            TonePod1[🎯 Tone Service Pod 1]
+            TonePod2[🎯 Tone Service Pod 2]
+        end
+        
+        subgraph "Data Services Namespace"
+            UserPod[👤 User Service Pod]
+            ConvPod[💬 Conversation Service Pod]
+            AnalyticsPod[📊 Analytics Service Pod]
+        end
+        
+        subgraph "Processing Namespace"
+            SparkDriver[⚡ Spark Driver]
+            SparkWorker1[⚡ Spark Worker 1]
+            SparkWorker2[⚡ Spark Worker 2]
+            SparkWorker3[⚡ Spark Worker 3]
+        end
+    end
+    
+    subgraph "Cloud Database Layer"
+        DataStaxAstra1[(🗄️ DataStax Astra<br/>Multi-Region Node 1)]
+        DataStaxAstra2[(🗄️ DataStax Astra<br/>Multi-Region Node 2)]
+        DataStaxAstra3[(🗄️ DataStax Astra<br/>Multi-Region Node 3)]
+        DataStaxVector[(🔍 DataStax Vector<br/>Embeddings Database)]
+        
+        RedisNode1[(⚡ Redis Node 1)]
+        RedisNode2[(⚡ Redis Node 2)]
+        RedisNode3[(⚡ Redis Node 3)]
+    end
+    
+    subgraph "Message Queue"
+        Kafka1[📊 Kafka Broker 1]
+        Kafka2[📊 Kafka Broker 2]
+        Kafka3[📊 Kafka Broker 3]
+        Zookeeper[🔧 Zookeeper Ensemble]
+    end
+    
+    subgraph "Monitoring Stack"
+        PrometheusServer[📈 Prometheus Server]
+        GrafanaServer[📊 Grafana Server]
+        AlertManagerServer[🚨 AlertManager]
+        ElasticStack[🔍 ELK Stack]
+    end
+    
+    %% External traffic flow
+    ELB --> ILB
+    ILB --> APIPod1
+    ILB --> APIPod2
+    ILB --> APIPod3
+    
+    %% Internal service communication
+    APIPod1 --> AIPod1
+    APIPod2 --> AIPod2
+    APIPod3 --> TonePod1
+    
+    AIPod1 --> UserPod
+    AIPod2 --> ConvPod
+    TonePod1 --> AnalyticsPod
+    
+    %% DataStax connections
+    UserPod --> DataStaxAstra1
+    ConvPod --> DataStaxAstra2
+    AnalyticsPod --> DataStaxAstra3
+    TonePod1 --> DataStaxVector
+    TonePod2 --> DataStaxVector
+    
+    %% Redis connections
+    APIPod1 --> RedisNode1
+    APIPod2 --> RedisNode2
+    APIPod3 --> RedisNode3
+    
+    %% Messaging
+    TonePod1 --> Kafka1
+    TonePod2 --> Kafka2
+    AnalyticsPod --> Kafka3
+    
+    Kafka1 --> SparkDriver
+    Kafka2 --> SparkWorker1
+    Kafka3 --> SparkWorker2
+    
+    %% Monitoring
+    APIPod1 -.-> PrometheusServer
+    AIPod1 -.-> PrometheusServer
+    TonePod1 -.-> PrometheusServer
+    PrometheusServer --> GrafanaServer
+    PrometheusServer --> AlertManagerServer
+```
