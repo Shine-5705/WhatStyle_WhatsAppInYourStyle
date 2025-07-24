@@ -24,20 +24,20 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0chealth.proto\x12\x06health\"%\n\x12HealthCheckRequest\x12\x0f\n\x07service\x18\x01 \x01(\t\"M\n\x13HealthCheckResponse\x12%\n\x06status\x18\x01 \x01(\x0e\x32\x15.health.ServingStatus\x12\x0f\n\x07message\x18\x02 \x01(\t*O\n\rServingStatus\x12\x0b\n\x07UNKNOWN\x10\x00\x12\x0b\n\x07SERVING\x10\x01\x12\x0f\n\x0bNOT_SERVING\x10\x02\x12\x13\n\x0fSERVICE_UNKNOWN\x10\x03\x32\x95\x01\n\rHealthService\x12@\n\x05\x43heck\x12\x1a.health.HealthCheckRequest\x1a\x1b.health.HealthCheckResponse\x12\x42\n\x05Watch\x12\x1a.health.HealthCheckRequest\x1a\x1b.health.HealthCheckResponse0\x01\x42\x45ZCgithub.com/Shine-5705/WhatStyle_WhatsAppInYourStyle/pkg/grpc/healthb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0chealth.proto\x12\x06health\"%\n\x12HealthCheckRequest\x12\x0f\n\x07service\x18\x01 \x01(\t\"\xb2\x01\n\x13HealthCheckResponse\x12\x39\n\x06status\x18\x01 \x01(\x0e\x32).health.HealthCheckResponse.ServingStatus\x12\x0f\n\x07message\x18\x02 \x01(\t\"O\n\rServingStatus\x12\x0b\n\x07UNKNOWN\x10\x00\x12\x0b\n\x07SERVING\x10\x01\x12\x0f\n\x0bNOT_SERVING\x10\x02\x12\x13\n\x0fSERVICE_UNKNOWN\x10\x03\x32\x95\x01\n\rHealthService\x12@\n\x05\x43heck\x12\x1a.health.HealthCheckRequest\x1a\x1b.health.HealthCheckResponse\x12\x42\n\x05Watch\x12\x1a.health.HealthCheckRequest\x1a\x1b.health.HealthCheckResponse0\x01\x42\x46ZDgithub.com/Shine-5705/WhatStyle_WhatsAppInYourwStyle/pkg/grpc/healthb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'health_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   _globals['DESCRIPTOR']._loaded_options = None
-  _globals['DESCRIPTOR']._serialized_options = b'ZCgithub.com/Shine-5705/WhatStyle_WhatsAppInYourStyle/pkg/grpc/health'
-  _globals['_SERVINGSTATUS']._serialized_start=142
-  _globals['_SERVINGSTATUS']._serialized_end=221
+  _globals['DESCRIPTOR']._serialized_options = b'ZDgithub.com/Shine-5705/WhatStyle_WhatsAppInYourwStyle/pkg/grpc/health'
   _globals['_HEALTHCHECKREQUEST']._serialized_start=24
   _globals['_HEALTHCHECKREQUEST']._serialized_end=61
-  _globals['_HEALTHCHECKRESPONSE']._serialized_start=63
-  _globals['_HEALTHCHECKRESPONSE']._serialized_end=140
-  _globals['_HEALTHSERVICE']._serialized_start=224
-  _globals['_HEALTHSERVICE']._serialized_end=373
+  _globals['_HEALTHCHECKRESPONSE']._serialized_start=64
+  _globals['_HEALTHCHECKRESPONSE']._serialized_end=242
+  _globals['_HEALTHCHECKRESPONSE_SERVINGSTATUS']._serialized_start=163
+  _globals['_HEALTHCHECKRESPONSE_SERVINGSTATUS']._serialized_end=242
+  _globals['_HEALTHSERVICE']._serialized_start=245
+  _globals['_HEALTHSERVICE']._serialized_end=394
 # @@protoc_insertion_point(module_scope)

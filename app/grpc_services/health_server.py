@@ -1,7 +1,7 @@
-# app/grpc_services/health_server.py
 import asyncio
 import grpc
 from grpc import aio
+from grpc_reflection.v1alpha import reflection
 import sys
 import os
 
@@ -103,6 +103,14 @@ async def serve():
     health_servicer = HealthServicer()
     health_pb2_grpc.add_HealthServiceServicer_to_server(health_servicer, server)
     
+    # ===== ADD REFLECTION SUPPORT =====
+    SERVICE_NAMES = (
+        health_pb2.DESCRIPTOR.services_by_name['HealthService'].full_name,
+        reflection.SERVICE_NAME,
+    )
+    reflection.enable_server_reflection(SERVICE_NAMES, server)
+    print("✅ gRPC reflection enabled")
+    
     # Configure server address
     listen_addr = '[::]:50051'
     server.add_insecure_port(listen_addr)
@@ -114,7 +122,10 @@ async def serve():
     print("📋 Available services:")
     print("   - health.HealthService/Check")
     print("   - health.HealthService/Watch")
+    print("   - grpc.reflection.v1alpha.ServerReflection (for grpcurl)")
+    print("")
     print("📞 Test with:")
+    print("   grpcurl -plaintext localhost:50051 list")
     print("   grpcurl -plaintext localhost:50051 health.HealthService/Check")
     print("   python app/grpc_services/health_client.py")
     
