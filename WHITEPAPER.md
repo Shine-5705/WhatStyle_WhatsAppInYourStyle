@@ -1,6 +1,6 @@
 # WhatStyle 
 
-### Sequence Diagram
+## Sequence Diagram
 
 **Scenario 1** -> Girlfriend sends casual message
 
@@ -245,4 +245,387 @@ sequenceDiagram
     
     Note over FallbackService: Log for later retry
     FallbackService->>FallbackService: Queue for retry when API available
+```
+
+## Class Diagram
+
+Core MCP Service Classes 
+```mermaid
+classDiagram
+    class MCPService {
+        +processMessage(MessageRequest) MessageResponse
+        +streamConversation(ConversationStreamRequest) Stream~ConversationUpdate~
+        +getContext(ContextRequest) ContextResponse
+        +updateContext(UpdateContextRequest) ContextResponse
+        +getTools(ToolsRequest) ToolsResponse
+        +executeTool(ToolExecutionRequest) ToolExecutionResponse
+        -validateMessage(MessageRequest) bool
+        -enrichContext(Context) EnrichedContext
+    }
+
+    class MessageHandler {
+        +handleIncoming(WhatsAppMessage) ProcessedMessage
+        +parseContent(string) ParsedContent
+        +extractMetadata(WhatsAppMessage) MessageMetadata
+        +validateSender(string) UserProfile
+        -sanitizeInput(string) string
+        -detectLanguage(string) string
+    }
+
+    class ContextManager {
+        +loadContext(conversationId) ConversationContext
+        +updateContext(Context, NewMessage) UpdatedContext
+        +getRecentMessages(userId, limit) List~Message~
+        +saveContext(Context) bool
+        -cleanOldContext() void
+        -compressContext(Context) CompressedContext
+    }
+
+    class ToolRegistry {
+        +registerTool(Tool) bool
+        +getTool(toolName) Tool
+        +getAvailableTools(context) List~Tool~
+        +executeTool(toolName, params) ToolResult
+        -validateToolParams(Tool, params) bool
+        -checkPermissions(Tool, user) bool
+    }
+
+    MCPService --> MessageHandler : uses
+    MCPService --> ContextManager : manages
+    MCPService --> ToolRegistry : coordinates
+    MessageHandler --> ContextManager : updates
+    ToolRegistry --> ContextManager : accesses
+```
+
+Tone Analysis Service Classes 
+```mermaid
+classDiagram
+    class ToneAnalysisService {
+        +analyzeTone(ToneAnalysisRequest) ToneAnalysisResponse
+        +batchAnalyzeTone(BatchRequest) BatchResponse
+        +getToneProfile(userId) ToneProfile
+        +updateToneProfile(userId, profile) bool
+        +streamToneAnalysis() Stream~ToneAnalysis~
+        +trainUserModel(TrainingData) ModelResult
+    }
+
+    class ToneClassifier {
+        +classifyTone(text, context) ToneClassification
+        +extractFeatures(text) ToneFeatures
+        +calculateConfidence(classification) float
+        +detectEmotions(text) EmotionalProfile
+        -preprocessText(text) ProcessedText
+        -loadModel(userId) PersonalizedModel
+    }
+
+    class EmotionDetector {
+        +detectEmotion(text, emojis) EmotionResult
+        +analyzeSentiment(text) SentimentScore
+        +detectUrgency(text) UrgencyLevel
+        +extractEmotionalCues(text) List~EmotionalCue~
+        -analyzeEmojis(emojis) EmojiSentiment
+        -detectSarcasm(text) SarcasmScore
+    }
+
+    class ToneProfileManager {
+        +createProfile(userId) ToneProfile
+        +updateProfile(userId, newData) ToneProfile
+        +getProfile(userId) ToneProfile
+        +evolveProfile(userId, interactions) ToneProfile
+        -calculateToneWeights(interactions) Map~ToneType, float~
+        -identifyPatterns(history) List~Pattern~
+    }
+
+    class PersonalizedModel {
+        +predict(features) ToneResult
+        +train(examples) TrainingResult
+        +update(newData) void
+        +getAccuracy() float
+        -featureEngineering(data) Features
+        -crossValidate() ValidationResult
+    }
+
+    ToneAnalysisService --> ToneClassifier : uses
+    ToneAnalysisService --> ToneProfileManager : manages
+    ToneClassifier --> EmotionDetector : integrates
+    ToneClassifier --> PersonalizedModel : uses
+    ToneProfileManager --> PersonalizedModel : maintains
+```
+
+AI Response Generation Classes
+```mermaid
+classDiagram
+    class AIService {
+        +generateResponse(context, toneProfile) Response
+        +generateEmpatheticResponse(emotion, context) Response
+        +adaptResponseTone(response, targetTone) AdaptedResponse
+        +selectModel(complexity, user) AIModel
+        -buildPrompt(context, tone) Prompt
+        -postProcessResponse(response) ProcessedResponse
+    }
+
+    class ModelRouter {
+        +selectOptimalModel(request) AIModel
+        +routeRequest(request) ModelEndpoint
+        +handleFailover(failedModel) AlternativeModel
+        +monitorPerformance() PerformanceMetrics
+        -calculateCost(model, request) float
+        -checkAvailability(model) bool
+    }
+
+    class PromptBuilder {
+        +buildDynamicPrompt(context, tone, relationship) Prompt
+        +addPersonalityContext(prompt, profile) EnhancedPrompt
+        +injectToneInstructions(prompt, tone) TonedPrompt
+        +addConversationHistory(prompt, history) ContextualPrompt
+        -templatePrompt(base, variables) Prompt
+        -validatePrompt(prompt) bool
+    }
+
+    class ResponseProcessor {
+        +formatResponse(rawResponse, tone) FormattedResponse
+        +addEmojis(response, profile) EmojiResponse
+        +adjustLength(response, preference) AdjustedResponse
+        +applySafetyFilter(response) SafeResponse
+        -detectInappropriate(response) bool
+        -enhanceReadability(response) EnhancedResponse
+    }
+
+    class MistralClient {
+        +chatCompletion(prompt) Response
+        +streamCompletion(prompt) Stream~Response~
+        +embedText(text) Embeddings
+        +handleError(error) ErrorResponse
+        -retryWithBackoff(request) Response
+        -manageRateLimit() void
+    }
+
+    AIService --> ModelRouter : uses
+    AIService --> PromptBuilder : creates
+    AIService --> ResponseProcessor : processes
+    ModelRouter --> MistralClient : routes to
+    PromptBuilder --> ResponseProcessor : feeds into
+```
+
+Data Layer Classes
+```mermaid
+classDiagram
+    class UserRepository {
+        +createUser(userProfile) User
+        +getUser(userId) User
+        +updateUser(userId, updates) User
+        +deleteUser(userId) bool
+        +findByPhone(phone) User
+        -validateUserData(data) bool
+        -encryptSensitiveData(data) EncryptedData
+    }
+
+    class ConversationRepository {
+        +createConversation(conversation) Conversation
+        +getConversation(conversationId) Conversation
+        +updateConversation(conversationId, updates) Conversation
+        +getConversationHistory(userId, limit) List~Message~
+        +archiveConversation(conversationId) bool
+        -partitionByDate(conversations) PartitionedData
+        -compressOldMessages(messages) CompressedMessages
+    }
+
+    class ToneDataRepository {
+        +saveToneAnalysis(analysis) bool
+        +getToneHistory(userId) List~ToneAnalysis~
+        +updateToneProfile(userId, profile) ToneProfile
+        +getToneStatistics(userId) ToneStats
+        +batchInsertAnalyses(analyses) bool
+        -indexToneData(data) IndexedData
+        -aggregateToneMetrics(data) AggregatedMetrics
+    }
+
+    class CacheService {
+        +get(key) CachedData
+        +set(key, data, ttl) bool
+        +delete(key) bool
+        +exists(key) bool
+        +invalidatePattern(pattern) bool
+        -serializeData(data) SerializedData
+        -compressData(data) CompressedData
+    }
+
+    class VectorDatabase {
+        +storeEmbedding(id, vector) bool
+        +searchSimilar(vector, limit) List~SimilarityResult~
+        +updateEmbedding(id, vector) bool
+        +deleteEmbedding(id) bool
+        +batchSearch(vectors) List~SearchResult~
+        -calculateSimilarity(v1, v2) float
+        -indexVector(vector) IndexedVector
+    }
+
+    UserRepository --> CacheService : caches
+    ConversationRepository --> VectorDatabase : stores embeddings
+    ToneDataRepository --> CacheService : caches profiles
+    VectorDatabase --> CacheService : caches results
+```
+
+WhatsApp Integration Classes
+```mermaid
+classDiagram
+    class WhatsAppClient {
+        +sendMessage(recipient, message) SendResult
+        +sendSticker(recipient, sticker) SendResult
+        +sendMedia(recipient, media) SendResult
+        +getMessageStatus(messageId) MessageStatus
+        +handleWebhook(webhookData) ProcessedWebhook
+        -validateRecipient(phone) bool
+        -formatMessage(content) FormattedMessage
+    }
+
+    class WebhookHandler {
+        +processIncoming(webhook) ProcessedMessage
+        +validateSignature(signature, body) bool
+        +parseMessage(webhookData) ParsedMessage
+        +extractSender(webhookData) SenderInfo
+        +handleDeliveryStatus(status) void
+        -verifyWebhookSource(webhook) bool
+        -extractMessageContent(data) MessageContent
+    }
+
+    class MessageParser {
+        +parseText(textMessage) ParsedText
+        +parseMedia(mediaMessage) ParsedMedia
+        +parseLocation(locationMessage) ParsedLocation
+        +parseContact(contactMessage) ParsedContact
+        +extractMetadata(message) MessageMetadata
+        -detectMessageType(message) MessageType
+        -sanitizeContent(content) SanitizedContent
+    }
+
+    class MessageSender {
+        +sendTextMessage(recipient, text) bool
+        +sendMediaMessage(recipient, media) bool
+        +sendTemplateMessage(recipient, template) bool
+        +queueMessage(message) bool
+        +retryFailedMessage(messageId) bool
+        -rateLimitCheck() bool
+        -formatForWhatsApp(message) WhatsAppMessage
+    }
+
+    class StickerService {
+        +getSupportiveSticker(emotion) Sticker
+        +getRandomSticker(category) Sticker
+        +createCustomSticker(image) Sticker
+        +getAllStickers() List~Sticker~
+        +getStickerByEmotion(emotion) List~Sticker~
+        -categorizeSticker(sticker) Category
+        -validateStickerFormat(sticker) bool
+    }
+
+    WhatsAppClient --> WebhookHandler : processes
+    WhatsAppClient --> MessageSender : sends through
+    WebhookHandler --> MessageParser : parses with
+    MessageSender --> StickerService : gets stickers from
+```
+
+Analytics and Monitoring Classes
+```mermaid
+classDiagram
+    class AnalyticsService {
+        +getConversationAnalytics(request) ConversationAnalytics
+        +getUserAnalytics(request) UserAnalytics
+        +getSystemMetrics(request) SystemMetrics
+        +streamAnalytics(subscription) Stream~AnalyticsUpdate~
+        +generateReport(reportRequest) Report
+        -aggregateMetrics(data) AggregatedMetrics
+        -calculateTrends(timeSeries) TrendAnalysis
+    }
+
+    class MetricsCollector {
+        +collectSystemMetrics() SystemMetrics
+        +collectUserMetrics(userId) UserMetrics
+        +collectConversationMetrics(convId) ConversationMetrics
+        +collectPerformanceMetrics() PerformanceMetrics
+        +recordEvent(event) bool
+        -calculateAverages(metrics) AverageMetrics
+        -detectAnomalies(metrics) List~Anomaly~
+    }
+
+    class ReportGenerator {
+        +generateUserReport(userId, period) UserReport
+        +generateSystemReport(period) SystemReport
+        +generateToneReport(userId, period) ToneReport
+        +exportToPDF(report) PDFReport
+        +exportToCSV(data) CSVExport
+        -formatReport(data, template) FormattedReport
+        -addVisualizations(report) VisualReport
+    }
+
+    class PerformanceMonitor {
+        +monitorResponseTime() ResponseTimeMetrics
+        +monitorThroughput() ThroughputMetrics
+        +monitorErrorRate() ErrorMetrics
+        +alertOnThreshold(metric, threshold) Alert
+        +trackResourceUsage() ResourceMetrics
+        -calculatePercentiles(data) PercentileMetrics
+        -detectPerformanceIssues(metrics) List~Issue~
+    }
+
+    AnalyticsService --> MetricsCollector : collects from
+    AnalyticsService --> ReportGenerator : generates with
+    MetricsCollector --> PerformanceMonitor : monitors through
+    ReportGenerator --> PerformanceMonitor : includes metrics from
+```
+
+Spark Integration Classes
+```mermaid
+classDiagram
+    class SparkJobManager {
+        +submitToneAnalysisJob(data) JobResult
+        +submitModelTrainingJob(config) TrainingResult
+        +submitAnalyticsJob(query) AnalyticsResult
+        +monitorJob(jobId) JobStatus
+        +cancelJob(jobId) bool
+        -createSparkSession() SparkSession
+        -optimizeQuery(query) OptimizedQuery
+    }
+
+    class ToneAnalyticsBatch {
+        +analyzeBatchTones(messages) BatchToneResult
+        +identifyTonePatterns(userData) TonePatterns
+        +calculateToneEvolution(userHistory) ToneEvolution
+        +generateToneInsights(analysis) ToneInsights
+        -preprocessMessages(messages) ProcessedMessages
+        -featureExtraction(messages) Features
+    }
+
+    class ConversationAnalytics {
+        +analyzeConversationFlow(conversations) FlowAnalysis
+        +identifyEngagementPatterns(data) EngagementPatterns
+        +calculateSatisfactionScores(feedback) SatisfactionMetrics
+        +detectConversationAnomalies(data) List~Anomaly~
+        -aggregateConversationData(data) AggregatedData
+        -timeSeriesAnalysis(data) TimeSeriesResults
+    }
+
+    class ModelTrainer {
+        +trainPersonalizedModel(userData) TrainedModel
+        +crossValidateModel(model, data) ValidationResults
+        +hyperparameterTuning(model) OptimizedModel
+        +evaluateModel(model, testData) EvaluationMetrics
+        -prepareTrainingData(rawData) TrainingDataset
+        -featureEngineering(data) EngineeredFeatures
+    }
+
+    class StreamProcessor {
+        +processMessageStream() Stream~ProcessedMessage~
+        +processAnalyticsStream() Stream~Analytics~
+        +processToneUpdates() Stream~ToneUpdate~
+        +handleBackpressure() void
+        -createKafkaStream() KafkaStream
+        -applyWindowingFunction(stream) WindowedStream
+    }
+
+    SparkJobManager --> ToneAnalyticsBatch : manages
+    SparkJobManager --> ConversationAnalytics : manages
+    SparkJobManager --> ModelTrainer : manages
+    SparkJobManager --> StreamProcessor : manages
+    ModelTrainer --> ToneAnalyticsBatch : uses data from
 ```
