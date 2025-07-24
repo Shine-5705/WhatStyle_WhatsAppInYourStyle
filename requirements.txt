@@ -1,0 +1,95 @@
+fastapi[all]
+uvicorn[standard]
+gunicorn
+starlette
+
+# gRPC and Protocol Buffers
+grpcio
+grpcio-tools
+grpcio-status
+protobuf
+googleapis-common-protos
+
+# Async HTTP client and WebSocket
+httpx
+aiohttp
+websockets
+aiofiles
+
+# Database drivers
+cassandra-driver
+redis
+hiredis
+
+# AI and ML libraries
+mistralai
+openai
+sentence-transformers
+transformers
+torch
+numpy
+scikit-learn
+
+# Data processing and validation
+pandas
+pydantic
+pydantic-settings
+python-multipart
+
+# Apache Spark
+pyspark
+findspark
+py4j
+
+# Kafka for streaming
+kafka-python
+confluent-kafka
+aiokafka
+
+# Security and authentication
+python-jose[cryptography]
+passlib[bcrypt]
+python-multipart
+bcrypt
+
+# Utilities and configuration
+python-dotenv
+pyyaml
+click
+typer
+rich
+email-validator
+
+# Monitoring and logging
+prometheus-client
+structlog
+colorlog
+opentelemetry-api
+opentelemetry-sdk
+
+# Date and time handling
+python-dateutil
+pytz 
+
+# HTTP and networking
+requests
+urllib3
+
+# Development and testing
+pytest
+pytest-asyncio
+pytest-cov
+pytest-mock
+httpx
+factory-boy
+
+# Code quality and formatting
+black
+isort
+flake8
+mypy
+pre-commit
+
+# Documentation
+mkdocs
+mkdocs-material
