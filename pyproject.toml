@@ -70,6 +70,7 @@ dependencies = [
     "transformers",
     "typer",
     "urllib3",
+    "uuid6>=2025.0.1",
     "uvicorn[standard]",
     "websockets",
 ]
