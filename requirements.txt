@@ -21,6 +21,7 @@ aiofiles
 cassandra-driver
 redis
 hiredis
+cqlengine
 
 # AI and ML libraries
 mistralai

@@ -14,6 +14,7 @@ dependencies = [
     "click",
     "colorlog",
     "confluent-kafka",
+    "cqlengine>=0.21.0",
     "email-validator",
     "factory-boy",
     "fastapi[all]",

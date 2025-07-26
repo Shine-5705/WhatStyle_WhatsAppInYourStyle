@@ -624,6 +624,16 @@ toml = [
 ]
 
 [[package]]
+name = "cqlengine"
+version = "0.21.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "cassandra-driver" },
+    { name = "six" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/4d/4c/0f3543468e732e10046902523b2cd3e75daa0138c067bc1fe8d2f8edf719/cqlengine-0.21.0.tar.gz", hash = "sha256:4d87bc9b37cf9aa99b3858a6474f78fb2365777dc6ce054761a1fa0c141d2500", size = 68681 }
+
+[[package]]
 name = "cryptography"
 version = "45.0.5"
 source = { registry = "https://pypi.org/simple" }
@@ -3932,6 +3942,7 @@ dependencies = [
     { name = "click" },
     { name = "colorlog" },
     { name = "confluent-kafka" },
+    { name = "cqlengine" },
     { name = "email-validator" },
     { name = "factory-boy" },
     { name = "fastapi", extra = ["all"] },
@@ -4002,6 +4013,7 @@ requires-dist = [
     { name = "click" },
     { name = "colorlog" },
     { name = "confluent-kafka" },
+    { name = "cqlengine", specifier = ">=0.21.0" },
     { name = "email-validator" },
     { name = "factory-boy" },
     { name = "fastapi", extras = ["all"] },
