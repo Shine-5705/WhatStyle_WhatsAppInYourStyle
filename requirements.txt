@@ -53,6 +53,7 @@ python-jose[cryptography]
 passlib[bcrypt]
 python-multipart
 bcrypt
+uuid6
 
 # Utilities and configuration
 python-dotenv
