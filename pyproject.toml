@@ -8,6 +8,7 @@ dependencies = [
     "aiofiles",
     "aiohttp",
     "aiokafka",
+    "astrapy>=2.0.1",
     "bcrypt",
     "black",
     "cassandra-driver",

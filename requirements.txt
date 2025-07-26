@@ -18,10 +18,9 @@ websockets
 aiofiles
 
 # Database drivers
-cassandra-driver
 redis
 hiredis
-cqlengine
+astrapy
 
 # AI and ML libraries
 mistralai
